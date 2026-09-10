@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->datetime('clock_in_at');
             $table->datetime('clock_out_at');
             $table->unsignedTinyInteger('status')->default(1);
-            $table->string('remarks', 255);
+            $table->string('remarks')->nullable()->comment('備考');
             $table->timestamps();
         });
     }
