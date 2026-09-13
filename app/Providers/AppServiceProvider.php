@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Lang;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Lang::addLines([
+            'auth.failed' => 'ログイン情報が登録されていません',
+        ], 'en');
     }
 }
