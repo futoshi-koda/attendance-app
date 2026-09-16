@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -47,5 +48,36 @@ class User extends Authenticatable
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function getAttendanceStatusAttribute()
+    {
+        // 今日の勤怠レコードを取得
+        $todayAttendance = $this->attendances()
+            ->whereDate('date', Carbon::today())
+            ->first();
+
+        // ① 当日のデータがない場合は「勤務外」
+        if (!$todayAttendance) {
+            return '勤務外';
+        }
+
+        // ② 当日のデータがある場合は、status カラムの値（1〜6）に応じて文字列を返す
+        switch ($todayAttendance->status) {
+            case 1:
+                return '勤務外';
+            case 2:
+                return '出勤中';
+            case 3:
+                return '休憩中';
+            case 4:
+                return '退勤済';
+            case 5:
+                return '修正申請中';
+            case 6:
+                return '承認済';
+            default:
+                return '勤務外';
+        }
     }
 }
