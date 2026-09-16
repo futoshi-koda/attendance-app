@@ -3,6 +3,7 @@
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AttendanceStampController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -34,11 +35,10 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('attendance.register');
     })->name('home');
 
-    // 一般ユーザー用（仮ルート）
-    Route::get('/user/attendance-register', function () {
-        $user = auth()->user();
-        return "一般ユーザーログイン成功！ようこそ {$user->name} さん（勤怠登録画面：準備中）";
-    })->name('attendance.register');
+    // 勤怠打刻画面（一般ユーザーのログイン後・登録後のリダイレクト先）
+    Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
+    // 打刻処理用 POST ルートを追加
+    Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
 
     // 管理者用（仮ルート）
     Route::get('/admin/attendance/list', function () {
