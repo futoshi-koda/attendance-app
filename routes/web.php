@@ -4,6 +4,7 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceStampController;
+use App\Http\Controllers\User\AttendanceController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -39,6 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
     // 打刻処理用 POST ルートを追加
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
+    // 勤怠一覧画面（PG04）
+    Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.list');
 
     // 管理者用（仮ルート）
     Route::get('/admin/attendance/list', function () {

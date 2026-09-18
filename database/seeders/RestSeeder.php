@@ -30,8 +30,8 @@ class RestSeeder extends Seeder
 
             $restsToInsert[] = [
                 'attendance_id' => $attendance->id,
-                'start_at' => $fixedRestStart->toDateTimeString(),
-                'end_at' => $fixedRestEnd->toDateTimeString(),
+                'break_in' => $fixedRestStart->toDateTimeString(),
+                'break_out' => $fixedRestEnd->toDateTimeString(),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
@@ -72,8 +72,8 @@ class RestSeeder extends Seeder
                     if (!$isOverlapped) {
                         $restsToInsert[] = [
                             'attendance_id' => $attendance->id,
-                            'start_at' => $newRestStart->toDateTimeString(),
-                            'end_at' => $newRestEnd->toDateTimeString(),
+                            'break_in' => $newRestStart->toDateTimeString(),
+                            'break_out' => $newRestEnd->toDateTimeString(),
                             'created_at' => $now,
                             'updated_at' => $now,
                         ];
