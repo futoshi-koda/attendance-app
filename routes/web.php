@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthe
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceStampController;
 use App\Http\Controllers\User\AttendanceController;
+use App\Http\Controllers\User\AttendanceDetailController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -42,6 +43,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
     // 勤怠一覧画面（PG04）
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.list');
+    // 勤怠詳細画面の表示（PG05）
+    Route::get('/attendance/{id}', [AttendanceDetailController::class, 'show'])->name('attendance.detail');
+
+    // 勤怠修正申請の送信（POST）
+    Route::post('/attendance/{id}', [AttendanceDetailController::class, 'update'])->name('attendance.update');
 
     // 管理者用（仮ルート）
     Route::get('/admin/attendance/list', function () {
