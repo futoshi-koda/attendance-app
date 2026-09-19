@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceStampController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\AttendanceDetailController;
+use App\Http\Controllers\User\ApplicationListController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -17,7 +18,7 @@ Route::get('/admin/login', function () {
     return view('admin.admin-login');
 })->name('admin.login');
 
-// 【変更】管理者ログイン処理（POST）
+// 管理者ログイン処理（POST）
 Route::post('/admin/login', [AdminAuthenticatedSessionController::class, 'store']);
 
 // --------------------------------------------------
@@ -29,7 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', function () {
         $user = auth()->user();
 
-        // role が 2 の場合は管理者
         if ($user->role === 2) {
             return redirect()->route('admin.attendance.list');
         }
@@ -37,19 +37,30 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('attendance.register');
     })->name('home');
 
-    // 勤怠打刻画面（一般ユーザーのログイン後・登録後のリダイレクト先）
+    // --------------------------------------------------
+    // 一般ユーザー：勤怠・打刻
+    // --------------------------------------------------
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
-    // 打刻処理用 POST ルートを追加
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
-    // 勤怠一覧画面（PG04）
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.list');
-    // 勤怠詳細画面の表示（PG05）
-    Route::get('/attendance/{id}', [AttendanceDetailController::class, 'show'])->name('attendance.detail');
 
-    // 勤怠修正申請の送信（POST）
+    // --------------------------------------------------
+    // 一般ユーザー：勤怠詳細・修正申請
+    // --------------------------------------------------
+    Route::get('/attendance/{id}', [AttendanceDetailController::class, 'show'])->name('attendance.detail');
     Route::post('/attendance/{id}', [AttendanceDetailController::class, 'update'])->name('attendance.update');
 
-    // 管理者用（仮ルート）
+    // ★ 申請一覧の Blade （/application/{id}）に対応するルートを追加
+    Route::get('/application/{id}', [AttendanceDetailController::class, 'show'])->name('application.detail');
+
+    // --------------------------------------------------
+    // 一般ユーザー：申請一覧
+    // --------------------------------------------------
+    Route::get('/stamp_correction_request/list', [ApplicationListController::class, 'index'])->name('application.list');
+
+    // --------------------------------------------------
+    // 管理者用ルート（仮）
+    // --------------------------------------------------
     Route::get('/admin/attendance/list', function () {
         $user = auth()->user();
         return "管理者ログイン成功！ようこそ {$user->name} 管理者（日次勤怠一覧画面：準備中）";
