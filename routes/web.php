@@ -22,7 +22,7 @@ Route::get('/admin/login', function () {
 Route::post('/admin/login', [AdminAuthenticatedSessionController::class, 'store']);
 
 // --------------------------------------------------
-// 認証済みユーザー用ルート（auth ミドルウェア）
+// 認証済みユーザー用ルート（一般ユーザー・管理者共通）
 // --------------------------------------------------
 Route::middleware('auth')->group(function () {
 
@@ -34,35 +34,33 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('admin.attendance.list');
         }
 
-        return redirect()->route('attendance.register');
+        // ★ 'attendance.register' から 'attendance.show' に修正
+        return redirect()->route('attendance.show');
     })->name('home');
 
     // --------------------------------------------------
-    // 一般ユーザー：勤怠・打刻
+    // 一般ユーザー用機能（auth のみ）
     // --------------------------------------------------
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.list');
 
-    // --------------------------------------------------
-    // 一般ユーザー：勤怠詳細・修正申請
-    // --------------------------------------------------
     Route::get('/attendance/{id}', [AttendanceDetailController::class, 'show'])->name('attendance.detail');
     Route::post('/attendance/{id}', [AttendanceDetailController::class, 'update'])->name('attendance.update');
-
-    // ★ 申請一覧の Blade （/application/{id}）に対応するルートを追加
     Route::get('/application/{id}', [AttendanceDetailController::class, 'show'])->name('application.detail');
 
-    // --------------------------------------------------
-    // 一般ユーザー：申請一覧
-    // --------------------------------------------------
     Route::get('/stamp_correction_request/list', [ApplicationListController::class, 'index'])->name('application.list');
+});
 
-    // --------------------------------------------------
-    // 管理者用ルート（仮）
-    // --------------------------------------------------
-    Route::get('/admin/attendance/list', function () {
+// --------------------------------------------------
+// 管理者専用ルート（auth + admin ミドルウェア）
+// --------------------------------------------------
+Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
+
+    // 管理者用日次勤怠一覧画面（PG08）
+    Route::get('/attendance/list', function () {
         $user = auth()->user();
-        return "管理者ログイン成功！ようこそ {$user->name} 管理者（日次勤怠一覧画面：準備中）";
-    })->name('admin.attendance.list');
+        return "管理者ログイン成功！ようこそ {$user->name} 管理者（日次勤怠一覧画面）";
+    })->name('attendance.list');
+
 });
