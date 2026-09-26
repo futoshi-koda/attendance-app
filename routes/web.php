@@ -7,6 +7,7 @@ use App\Http\Controllers\AttendanceStampController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\AttendanceDetailController;
 use App\Http\Controllers\User\ApplicationListController;
+use App\Http\Controllers\Admin\DailyAttendanceController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -58,9 +59,6 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
 
     // 管理者用日次勤怠一覧画面（PG08）
-    Route::get('/attendance/list', function () {
-        $user = auth()->user();
-        return "管理者ログイン成功！ようこそ {$user->name} 管理者（日次勤怠一覧画面）";
-    })->name('attendance.list');
+    Route::get('/attendance/list', [DailyAttendanceController::class, 'index'])->name('attendance.list');
 
 });
