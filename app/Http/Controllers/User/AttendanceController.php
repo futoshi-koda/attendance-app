@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,11 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. クエリパラメータ 'date' を取得（なければ当月1日）
+        // 管理者の場合は管理者用日次勤怠一覧（PG08）へリダイレクト
+        if (Auth::check() && Auth::user()->role === 2) {
+            return redirect()->route('admin.attendance.list');
+        }
+        // 1. クエリパラメータ 'date' を取得（指定がなければ当月1日）
         $dateParam = $request->query('date');
 
         try {
@@ -26,12 +31,12 @@ class AttendanceController extends Controller
         $previousMonth = $date->copy()->subMonth()->format('Y-m');
         $nextMonth = $date->copy()->addMonth()->format('Y-m');
 
-        // 3. 対象月の開始日・終了日・日数
+        // 3. 対象月の開始日と終了日
         $startOfMonth = $date->copy()->startOfMonth();
         $endOfMonth = $date->copy()->endOfMonth();
         $daysInMonth = $date->daysInMonth;
 
-        // 4. ログインユーザーの対象月勤怠データを取得
+        // 4. ログインユーザーの対象月勤怠データを取得（日付文字列をキーにして保持）
         $user = Auth::user();
         $attendances = $user->attendances()
             ->with('rests')
@@ -41,7 +46,7 @@ class AttendanceController extends Controller
                 return Carbon::parse($item->date)->toDateString();
             });
 
-        // 5. 1日〜末日までの全日付データを構築
+        // 5. 1日〜末日までの日付データを構築（Blade側が求める配列形式に整形）
         $formattedAttendanceRecords = [];
         $weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -49,59 +54,16 @@ class AttendanceController extends Controller
             $currentDate = $date->copy()->day($day);
             $dateKey = $currentDate->toDateString();
 
-            // 該当日の勤怠データを取得
+            // 該当日の勤怠モデルを取得
             $attendance = $attendances->get($dateKey);
 
-            $clockIn = null;
-            $clockOut = null;
-            $totalBreakTime = null;
-            $totalTime = null;
-            $attendanceId = null;
-
-            if ($attendance) {
-                $attendanceId = $attendance->id;
-
-                // 出勤・退勤時刻（H:i 形式）
-                $clockIn = $attendance->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : '';
-                $clockOut = $attendance->clock_out_at ? Carbon::parse($attendance->clock_out_at)->format('H:i') : '';
-
-                // --- 休憩合計時間の計算 ---
-                $totalBreakMinutes = 0;
-                foreach ($attendance->rests as $rest) {
-                    $start = $rest->break_in;
-                    $end = $rest->break_out;
-
-                    if ($start && $end) {
-                        $totalBreakMinutes += Carbon::parse($start)->diffInMinutes(Carbon::parse($end));
-                    }
-                }
-
-                if ($totalBreakMinutes > 0) {
-                    $breakHours = floor($totalBreakMinutes / 60);
-                    $breakMins = $totalBreakMinutes % 60;
-                    // Blade 側の Carbon::parse($total_break_time)->format('G:i') に対応させるため H:i 形式で保持
-                    $totalBreakTime = sprintf('%02d:%02d', $breakHours, $breakMins);
-                }
-
-                // --- 勤務合計時間の計算 ---
-                if ($attendance->clock_in_at && $attendance->clock_out_at) {
-                    $workingMinutes = Carbon::parse($attendance->clock_in_at)->diffInMinutes(Carbon::parse($attendance->clock_out_at));
-                    $actualWorkingMinutes = max(0, $workingMinutes - $totalBreakMinutes);
-
-                    $workHours = floor($actualWorkingMinutes / 60);
-                    $workMins = $actualWorkingMinutes % 60;
-                    $totalTime = sprintf('%02d:%02d', $workHours, $workMins);
-                }
-            }
-
-            // Blade に渡す配列フォーマットを定義
             $formattedAttendanceRecords[] = [
-                'id' => $attendanceId,
+                'id' => $attendance?->id,
                 'date' => sprintf('%02d/%02d(%s)', $currentDate->month, $currentDate->day, $weekdays[$currentDate->dayOfWeek]),
-                'clock_in' => $clockIn ?? '',
-                'clock_out' => $clockOut ?? '',
-                'total_break_time' => $totalBreakTime,
-                'total_time' => $totalTime,
+                'clock_in' => $attendance?->clock_in ? Carbon::parse($attendance->clock_in)->format('H:i') : '',
+                'clock_out' => $attendance?->clock_out ? Carbon::parse($attendance->clock_out)->format('H:i') : '',
+                'total_break_time' => $attendance?->total_break_time,
+                'total_time' => $attendance?->total_time,
             ];
         }
 

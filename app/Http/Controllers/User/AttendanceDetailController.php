@@ -15,6 +15,12 @@ class AttendanceDetailController extends Controller
      */
     public function show($id)
     {
+        $user = auth()->user();
+
+        //    ログインユーザーが管理者の場合は、管理者用のコントローラー処理へ委譲する
+        if ($user->role === 2) {
+            return app(\App\Http\Controllers\Admin\AttendanceDetailController::class)->show($id);
+        }
         $attendance = Attendance::with(['rests', 'user'])->findOrFail($id);
         $user = $attendance->user;
 

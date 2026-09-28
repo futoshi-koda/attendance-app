@@ -22,8 +22,8 @@ class DailyAttendanceController extends Controller
         $previousDay = $date->copy()->subDay()->toDateString();
         $nextDay = $date->copy()->addDay()->toDateString();
 
-        // 一般ユーザー一覧を取得
-        $users = User::where('role', 1)->get();
+        // 管理者を含む全ユーザーを取得
+        $users = User::all();
 
         // 対象日の勤怠レコードを全件取得
         $attendanceRecords = Attendance::whereDate('date', $date->toDateString())->get();
