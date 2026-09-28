@@ -80,4 +80,12 @@ class User extends Authenticatable
                 return '勤務外';
         }
     }
+    /**
+     * admin_status の仮想プロパティ（アクセサ）
+     * $user->admin_status で参照可能になります
+     */
+    public function getAdminStatusAttribute(): bool
+    {
+        return $this->role === 2;
+    }
 }

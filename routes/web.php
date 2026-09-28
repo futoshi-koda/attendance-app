@@ -8,6 +8,7 @@ use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\AttendanceDetailController;
 use App\Http\Controllers\User\ApplicationListController;
 use App\Http\Controllers\Admin\DailyAttendanceController;
+use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -22,9 +23,30 @@ Route::get('/admin/login', function () {
 // 管理者ログイン処理（POST）
 Route::post('/admin/login', [AdminAuthenticatedSessionController::class, 'store']);
 
-// --------------------------------------------------
-// 認証済みユーザー用ルート（一般ユーザー・管理者共通）
-// --------------------------------------------------
+
+// ==================================================
+// 1. 管理者専用ルート（auth + admin）
+// prefix('admin') を設定し、/admin/... のパスを統合します
+// ==================================================
+Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
+
+    // 管理者用日次勤怠一覧画面（PG08）
+    Route::get('/attendance/list', [DailyAttendanceController::class, 'index'])->name('attendance.list');
+
+    // 管理者ログアウト処理（/admin/logout に対応）
+    Route::post('/logout', [AdminAuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // スタッフ一覧画面（仮ルート）
+    Route::get('/staff/list', function () {
+        return 'スタッフ一覧画面（作成予定）';
+    })->name('staff.list');
+
+});
+
+
+// ==================================================
+// 2. 認証済み一般ユーザー用ルート（auth）
+// ==================================================
 Route::middleware('auth')->group(function () {
 
     // ログイン後の振分トップ（リダイレクト受け皿）
@@ -35,13 +57,10 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('admin.attendance.list');
         }
 
-        // ★ 'attendance.register' から 'attendance.show' に修正
         return redirect()->route('attendance.show');
     })->name('home');
 
-    // --------------------------------------------------
-    // 一般ユーザー用機能（auth のみ）
-    // --------------------------------------------------
+    // 一般ユーザー機能
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/list', [AttendanceController::class, 'index'])->name('attendance.list');
@@ -50,15 +69,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance/{id}', [AttendanceDetailController::class, 'update'])->name('attendance.update');
     Route::get('/application/{id}', [AttendanceDetailController::class, 'show'])->name('application.detail');
 
+    // 申請一覧（管理者・一般ユーザー共通でアクセス可能）
     Route::get('/stamp_correction_request/list', [ApplicationListController::class, 'index'])->name('application.list');
-});
-
-// --------------------------------------------------
-// 管理者専用ルート（auth + admin ミドルウェア）
-// --------------------------------------------------
-Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(function () {
-
-    // 管理者用日次勤怠一覧画面（PG08）
-    Route::get('/attendance/list', [DailyAttendanceController::class, 'index'])->name('attendance.list');
-
 });
