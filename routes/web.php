@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DailyAttendanceController;
 use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
 use App\Http\Controllers\Admin\StaffListController;
 use App\Http\Controllers\Admin\StaffAttendanceController;
+use App\Http\Controllers\Admin\StampCorrectionRequestController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -40,13 +41,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 
     // PG10: スタッフ一覧画面
     Route::get('/staff/list', [StaffListController::class, 'index'])->name('staff.list');
+
     // PG11: スタッフ別月次勤怠一覧画面（{id} はユーザーID）
     Route::get('/attendance/staff/{id}', [StaffAttendanceController::class, 'show'])->name('attendance.staff');
 });
 
 
 // ==================================================
-// 2. 認証済み一般ユーザー用ルート（auth）
+// 2. 認証済み一般ユーザー・管理者共通ルート（auth）
 // ==================================================
 Route::middleware('auth')->group(function () {
 
@@ -55,7 +57,7 @@ Route::middleware('auth')->group(function () {
         $user = auth()->user();
 
         if ($user->role === 2) {
-            return redirect()->route('admin.attendance.list');
+            return redirect()->route('admin.application.list');
         }
 
         return redirect()->route('attendance.show');
@@ -68,8 +70,27 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/attendance/{id}', [AttendanceDetailController::class, 'show'])->name('attendance.detail');
     Route::post('/attendance/{id}', [AttendanceDetailController::class, 'update'])->name('attendance.update');
-    Route::get('/application/{id}', [AttendanceDetailController::class, 'show'])->name('application.detail');
 
-    // 申請一覧（管理者・一般ユーザー共通でアクセス可能）
-    Route::get('/stamp_correction_request/list', [ApplicationListController::class, 'index'])->name('application.list');
+    // PG13: 承認詳細画面の表示（GET）と 承認実行処理（POST）
+    Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [StampCorrectionRequestController::class, 'show'])
+        ->name('stamp_correction_request.approve.show');
+
+    Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [StampCorrectionRequestController::class, 'approve'])
+        ->name('stamp_correction_request.approve.submit');
+
+    // 申請詳細画面（/application/{id}）の分岐対応
+    Route::get('/application/{id}', function ($id) {
+        if (auth()->user()->role === 2) {
+            return app(StampCorrectionRequestController::class)->show($id);
+        }
+        return app(AttendanceDetailController::class)->show($id);
+    })->name('application.detail');
+
+    // 申請一覧（メインルート）
+    Route::get('/stamp_correction_request/list', [ApplicationListController::class, 'index'])
+        ->name('application.list');
+
+    // コントローラー側の admin.application.list 呼び出し（リダイレクト先）にも対応させるエイリアスルート
+    Route::get('/admin/stamp_correction_request/list', [ApplicationListController::class, 'index'])
+        ->name('admin.application.list');
 });
