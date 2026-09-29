@@ -9,6 +9,7 @@ use App\Http\Controllers\User\AttendanceDetailController;
 use App\Http\Controllers\User\ApplicationListController;
 use App\Http\Controllers\Admin\DailyAttendanceController;
 use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
+use App\Http\Controllers\Admin\StaffListController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -36,10 +37,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // 管理者ログアウト処理（/admin/logout に対応）
     Route::post('/logout', [AdminAuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    // スタッフ一覧画面（仮ルート）
-    Route::get('/staff/list', function () {
-        return 'スタッフ一覧画面（作成予定）';
-    })->name('staff.list');
+    // PG10: スタッフ一覧画面
+    Route::get('/staff/list', [StaffListController::class, 'index'])->name('staff.list');
 
 });
 
