@@ -10,6 +10,7 @@ use App\Http\Controllers\User\ApplicationListController;
 use App\Http\Controllers\Admin\DailyAttendanceController;
 use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
 use App\Http\Controllers\Admin\StaffListController;
+use App\Http\Controllers\Admin\StaffAttendanceController;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -39,7 +40,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 
     // PG10: スタッフ一覧画面
     Route::get('/staff/list', [StaffListController::class, 'index'])->name('staff.list');
-
+    // PG11: スタッフ別月次勤怠一覧画面（{id} はユーザーID）
+    Route::get('/attendance/staff/{id}', [StaffAttendanceController::class, 'show'])->name('attendance.staff');
 });
 
 
