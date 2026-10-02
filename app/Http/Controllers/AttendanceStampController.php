@@ -58,7 +58,7 @@ class AttendanceStampController extends Controller
                 if ($attendance && $attendance->status === 3) {
                     $attendance->update(['status' => 2]);
 
-                    $latestRest = $attendance->rests()->whereNull('breal_out')->latest()->first();
+                    $latestRest = $attendance->rests()->whereNull('break_out')->latest()->first();
                     if ($latestRest) {
                         $latestRest->update(['break_out' => $now]);
                     }
