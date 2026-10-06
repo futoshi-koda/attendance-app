@@ -36,6 +36,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // 管理者用日次勤怠一覧画面（PG08）
     Route::get('/attendance/list', [DailyAttendanceController::class, 'index'])->name('attendance.list');
 
+    // PG09 管理者用勤怠詳細画面表示
+    Route::get('/attendance/{id}', [AdminAttendanceDetailController::class, 'show'])->name('attendance.show');
+
     // 管理者ログアウト処理（/admin/logout に対応）
     Route::post('/logout', [AdminAuthenticatedSessionController::class, 'destroy'])->name('logout');
 
