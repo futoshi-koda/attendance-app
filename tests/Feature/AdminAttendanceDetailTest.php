@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Rest;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,7 +35,7 @@ class AdminAttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->get('/admin/attendance/' . $attendance->id);
+        $response = $this->actingAs($admin)->get('/admin/attendance/'.$attendance->id);
 
         // Assert
         $response->assertStatus(200);
@@ -64,7 +64,7 @@ class AdminAttendanceDetailTest extends TestCase
         ]);
 
         // Act: 出勤時間(19:00) > 退勤時間(18:00)
-        $response = $this->actingAs($admin)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($admin)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '19:00',
             'new_clock_out' => '18:00',
             'comment' => '修正理由',
@@ -93,7 +93,7 @@ class AdminAttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($admin)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '09:00',
             'new_clock_out' => '18:00',
             'new_break_in' => ['0' => '19:00'],
@@ -120,7 +120,7 @@ class AdminAttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($admin)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '09:00',
             'new_clock_out' => '18:00',
             'new_break_in' => ['0' => '17:30'],
@@ -147,7 +147,7 @@ class AdminAttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($admin)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '09:00',
             'new_clock_out' => '18:00',
             'comment' => '',

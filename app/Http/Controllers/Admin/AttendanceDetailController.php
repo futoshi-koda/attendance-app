@@ -1,18 +1,20 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Http\Requests\AttendanceUpdateRequest; // 共通バリデーションリクエスト
-use Illuminate\Http\Request;
+use App\Models\Attendance;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class AttendanceDetailController extends Controller
 {
     /**
      * 管理者：勤怠詳細画面表示 (PG09)
      */
-    public function show($id)
+    public function show(int|string $id): View
     {
         $attendance = Attendance::with(['user', 'rests'])->findOrFail($id);
         $user = $attendance->user;
@@ -20,7 +22,7 @@ class AttendanceDetailController extends Controller
         // Carbon インスタンスへ変換
         $date = Carbon::parse($attendance->date);
 
-        // 休憩データの整形
+        // 休憩データの整形（Collection メソッドを活用）
         $breaks = $attendance->rests->map(function ($rest) {
             return [
                 'break_in' => $rest->break_in ? Carbon::parse($rest->break_in)->format('H:i') : '',
@@ -44,12 +46,11 @@ class AttendanceDetailController extends Controller
     /**
      * 管理者：勤怠データ直接修正処理
      */
-    public function update(AttendanceUpdateRequest $request, $id)
+    public function update(AttendanceUpdateRequest $request, int|string $id): RedirectResponse
     {
         $attendance = Attendance::findOrFail($id);
 
         // 管理者による直接更新処理（勤怠本体および Rest レコードの更新ロジック）
-        // ...
 
         return redirect()->route('admin.attendance.list')->with('success', '勤怠データを修正しました。');
     }

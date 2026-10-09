@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Attendance;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminStaffListTest extends TestCase
@@ -46,13 +46,13 @@ class AdminStaffListTest extends TestCase
         Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 4,
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->get('/admin/attendance/staff/' . $user->id);
+        $response = $this->actingAs($admin)->get('/admin/attendance/staff/'.$user->id);
 
         // Assert
         $response->assertStatus(200);
@@ -73,7 +73,7 @@ class AdminStaffListTest extends TestCase
         $prevMonth = $currentMonth->copy()->subMonth();
 
         // Act
-        $response = $this->actingAs($admin)->get('/admin/attendance/staff/' . $user->id . '?date=' . $prevMonth->format('Y-m'));
+        $response = $this->actingAs($admin)->get('/admin/attendance/staff/'.$user->id.'?date='.$prevMonth->format('Y-m'));
 
         // Assert
         $response->assertStatus(200);
@@ -91,7 +91,7 @@ class AdminStaffListTest extends TestCase
         $nextMonth = $currentMonth->copy()->addMonth();
 
         // Act
-        $response = $this->actingAs($admin)->get('/admin/attendance/staff/' . $user->id . '?date=' . $nextMonth->format('Y-m'));
+        $response = $this->actingAs($admin)->get('/admin/attendance/staff/'.$user->id.'?date='.$nextMonth->format('Y-m'));
 
         // Assert
         $response->assertStatus(200);
@@ -109,16 +109,16 @@ class AdminStaffListTest extends TestCase
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 4,
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->get('/admin/attendance/staff/' . $user->id);
+        $response = $this->actingAs($admin)->get('/admin/attendance/staff/'.$user->id);
 
         // Assert
         $response->assertStatus(200);
-        $response->assertSee(url('/attendance/' . $attendance->id));
+        $response->assertSee(url('/attendance/'.$attendance->id));
     }
 }

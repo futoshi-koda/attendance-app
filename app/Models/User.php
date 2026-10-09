@@ -3,12 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -45,6 +45,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
@@ -80,6 +81,7 @@ class User extends Authenticatable
                 return '勤務外';
         }
     }
+
     /**
      * admin_status の仮想プロパティ（アクセサ）
      * $user->admin_status で参照可能になります

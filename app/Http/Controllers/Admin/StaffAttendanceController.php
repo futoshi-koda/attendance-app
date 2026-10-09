@@ -3,17 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Attendance;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class StaffAttendanceController extends Controller
 {
     /**
      * スタッフ別月次勤怠一覧画面表示（PG11）
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, int|string $id): View
     {
         // 対象のユーザーを取得（存在しない場合は404）
         $user = User::findOrFail($id);
@@ -35,8 +36,9 @@ class StaffAttendanceController extends Controller
         $startOfMonth = $date->copy()->startOfMonth();
         $endOfMonth = $date->copy()->endOfMonth();
 
-        // 該当ユーザーの当月の勤怠データを取得して日付（Y-m-d）をキーにした連想配列を作成
-        $attendances = Attendance::where('user_id', $user->id)
+        // 該当ユーザーの当月の勤怠データを取得して日付（Y-m-d）をキーにした連想配列を作成（Eager Loading 指定）
+        $attendances = Attendance::with(['rests'])
+            ->where('user_id', $user->id)
             ->whereBetween('date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->get()
             ->keyBy(function ($item) {

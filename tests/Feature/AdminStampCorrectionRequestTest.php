@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Attendance;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminStampCorrectionRequestTest extends TestCase
@@ -27,8 +27,8 @@ class AdminStampCorrectionRequestTest extends TestCase
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 5, // 承認待ち
             'remarks' => '修正理由テスト',
             'application_date' => $today->format('Y-m-d'),
@@ -55,8 +55,8 @@ class AdminStampCorrectionRequestTest extends TestCase
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 6, // 承認済み
             'remarks' => '承認済み理由テスト',
             'application_date' => $today->format('Y-m-d'),
@@ -83,15 +83,15 @@ class AdminStampCorrectionRequestTest extends TestCase
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 5,
             'remarks' => '詳細画面理由テスト',
             'application_date' => $today->format('Y-m-d'),
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->get('/stamp_correction_request/approve/' . $attendance->id);
+        $response = $this->actingAs($admin)->get('/stamp_correction_request/approve/'.$attendance->id);
 
         // Assert
         $response->assertStatus(200);
@@ -111,15 +111,15 @@ class AdminStampCorrectionRequestTest extends TestCase
         $attendance = Attendance::create([
             'user_id' => $user->id,
             'date' => $today->format('Y-m-d'),
-            'clock_in_at' => $today->format('Y-m-d') . ' 09:00:00',
-            'clock_out_at' => $today->format('Y-m-d') . ' 18:00:00',
+            'clock_in_at' => $today->format('Y-m-d').' 09:00:00',
+            'clock_out_at' => $today->format('Y-m-d').' 18:00:00',
             'status' => 5,
             'remarks' => '承認実行テスト',
             'application_date' => $today->format('Y-m-d'),
         ]);
 
         // Act
-        $response = $this->actingAs($admin)->post('/stamp_correction_request/approve/' . $attendance->id);
+        $response = $this->actingAs($admin)->post('/stamp_correction_request/approve/'.$attendance->id);
 
         // Assert
         $response->assertRedirect('/admin/stamp_correction_request/list');

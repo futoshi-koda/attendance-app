@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -27,6 +27,7 @@ class AuthenticatedSessionController extends Controller
             'email' => __('auth.failed'),
         ]);
     }
+
     /**
      * 管理者ログアウト処理
      */

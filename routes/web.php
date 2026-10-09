@@ -1,17 +1,16 @@
 <?php
 
-use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController as AdminAuthenticatedSessionController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DailyAttendanceController;
+use App\Http\Controllers\Admin\StaffAttendanceController;
+use App\Http\Controllers\Admin\StaffListController;
+use App\Http\Controllers\Admin\StampCorrectionRequestController;
 use App\Http\Controllers\AttendanceStampController;
+use App\Http\Controllers\User\ApplicationListController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\AttendanceDetailController;
-use App\Http\Controllers\User\ApplicationListController;
-use App\Http\Controllers\Admin\DailyAttendanceController;
-use App\Http\Controllers\Admin\AttendanceDetailController as AdminAttendanceDetailController;
-use App\Http\Controllers\Admin\StaffListController;
-use App\Http\Controllers\Admin\StaffAttendanceController;
-use App\Http\Controllers\Admin\StampCorrectionRequestController;
+use Illuminate\Support\Facades\Route;
 
 // トップページアクセス時は一般ログイン画面へリダイレクト
 Route::get('/', function () {
@@ -25,7 +24,6 @@ Route::get('/admin/login', function () {
 
 // 管理者ログイン処理（POST）
 Route::post('/admin/login', [AdminAuthenticatedSessionController::class, 'store']);
-
 
 // ==================================================
 // 1. 管理者専用ルート（auth + admin）
@@ -48,7 +46,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
     // PG11: スタッフ別月次勤怠一覧画面（{id} はユーザーID）
     Route::get('/attendance/staff/{id}', [StaffAttendanceController::class, 'show'])->name('attendance.staff');
 });
-
 
 // ==================================================
 // 2. 認証済み一般ユーザー・管理者共通ルート（auth）
@@ -86,6 +83,7 @@ Route::middleware('auth')->group(function () {
         if (auth()->user()->role === 2) {
             return app(StampCorrectionRequestController::class)->show($id);
         }
+
         return app(AttendanceDetailController::class)->show($id);
     })->name('application.detail');
 

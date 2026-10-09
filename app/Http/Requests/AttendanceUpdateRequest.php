@@ -3,14 +3,21 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class AttendanceUpdateRequest extends FormRequest
 {
+    /**
+     * リクエストの実行権限判定
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * バリデーションルール定義
+     */
     public function rules(): array
     {
         return [
@@ -22,6 +29,9 @@ class AttendanceUpdateRequest extends FormRequest
         ];
     }
 
+    /**
+     * エラーメッセージ定義
+     */
     public function messages(): array
     {
         return [
@@ -39,7 +49,7 @@ class AttendanceUpdateRequest extends FormRequest
     /**
      * 相関バリデーション（出勤・退勤時刻と休憩時刻の比較チェック）
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
             $clockIn = $this->input('new_clock_in');
@@ -50,7 +60,7 @@ class AttendanceUpdateRequest extends FormRequest
             // 片方入力チェック
             foreach ($breakIns as $index => $breakIn) {
                 $breakOut = $breakOuts[$index] ?? null;
-                if (($breakIn && !$breakOut) || (!$breakIn && $breakOut)) {
+                if (($breakIn && ! $breakOut) || (! $breakIn && $breakOut)) {
                     $validator->errors()->add(
                         "new_break_in.{$index}",
                         '休憩の開始時間と終了時間は両方入力してください'
