@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Models\Attendance;
 use App\Models\Rest;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class RestSeeder extends Seeder
 {
@@ -43,7 +43,7 @@ class RestSeeder extends Seeder
 
             // user1 以外のユーザーには追加のランダム休憩 (0〜3回) を付与
             $existingRests = [
-                ['start' => $fixedRestStart, 'end' => $fixedRestEnd]
+                ['start' => $fixedRestStart, 'end' => $fixedRestEnd],
             ];
 
             $additionalRestCount = fake()->numberBetween(0, 3);
@@ -69,7 +69,7 @@ class RestSeeder extends Seeder
                         }
                     }
 
-                    if (!$isOverlapped) {
+                    if (! $isOverlapped) {
                         $restsToInsert[] = [
                             'attendance_id' => $attendance->id,
                             'break_in' => $newRestStart->toDateTimeString(),

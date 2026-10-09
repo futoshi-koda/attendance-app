@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Attendance;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\Carbon;
 use Tests\TestCase;
 
 class AttendanceDetailTest extends TestCase
@@ -30,7 +29,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($user)->get('/attendance/' . $attendance->id);
+        $response = $this->actingAs($user)->get('/attendance/'.$attendance->id);
 
         // Assert
         $response->assertStatus(200);
@@ -53,7 +52,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($user)->get('/attendance/' . $attendance->id);
+        $response = $this->actingAs($user)->get('/attendance/'.$attendance->id);
 
         // Assert
         $response->assertStatus(200);
@@ -80,7 +79,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act
-        $response = $this->actingAs($user)->get('/attendance/' . $attendance->id);
+        $response = $this->actingAs($user)->get('/attendance/'.$attendance->id);
 
         // Assert
         $response->assertStatus(200);
@@ -105,7 +104,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act: 出勤時間(19:00) > 退勤時間(18:00) で送信
-        $response = $this->actingAs($user)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($user)->post('/attendance/'.$attendance->id, [
             'clock_in' => '19:00',
             'clock_out' => '18:00',
             'remarks' => '時間修正',
@@ -129,11 +128,11 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act: 休憩開始(19:00) > 退勤時間(18:00) で送信
-        $response = $this->actingAs($user)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($user)->post('/attendance/'.$attendance->id, [
             'clock_in' => '09:00',
             'clock_out' => '18:00',
             'rests' => [
-                ['break_in' => '19:00', 'break_out' => '20:00']
+                ['break_in' => '19:00', 'break_out' => '20:00'],
             ],
             'remarks' => '休憩時間修正',
         ]);
@@ -156,11 +155,11 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act: 休憩終了(19:00) > 退勤時間(18:00) で送信
-        $response = $this->actingAs($user)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($user)->post('/attendance/'.$attendance->id, [
             'clock_in' => '09:00',
             'clock_out' => '18:00',
             'rests' => [
-                ['break_in' => '12:00', 'break_out' => '19:00']
+                ['break_in' => '12:00', 'break_out' => '19:00'],
             ],
             'remarks' => '休憩時間修正',
         ]);
@@ -168,6 +167,7 @@ class AttendanceDetailTest extends TestCase
         // Assert
         $response->assertSessionHasErrors();
     }
+
     /** @test */
     public function 備考欄が未入力の場合_エラーメッセージが表示される(): void
     {
@@ -182,7 +182,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act: 備考(comment)を空で送信
-        $response = $this->actingAs($user)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($user)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '09:00',
             'new_clock_out' => '18:00',
             'comment' => '',
@@ -206,7 +206,7 @@ class AttendanceDetailTest extends TestCase
         ]);
 
         // Act: コントローラーのフィールド名に合わせて送信
-        $response = $this->actingAs($user)->post('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($user)->post('/attendance/'.$attendance->id, [
             'new_clock_in' => '09:30',
             'new_clock_out' => '18:30',
             'comment' => '電車遅延のため修正',

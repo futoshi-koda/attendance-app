@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -9,12 +10,14 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckAdmin
 {
     /**
-     * Handle an incoming request.
+     * リクエストの管理者権限チェック処理
+     *
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // 1. 未認証（未ログイン）の場合は管理者ログイン画面へリダイレクト
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('admin.login');
         }
 

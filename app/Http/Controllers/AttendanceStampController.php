@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\Models\Attendance;
 use App\Models\Rest;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class AttendanceStampController extends Controller
 {
-    // 
-    public function show()
+    /**
+     * 打刻画面（PG02 / PG03）を表示
+     */
+    public function show(): View
     {
         $user = Auth::user();
         $now = Carbon::now();
@@ -21,7 +25,11 @@ class AttendanceStampController extends Controller
 
         return view('user.attendance-register', compact('user', 'formattedDate', 'formattedTime'));
     }
-    public function store(Request $request)
+
+    /**
+     * 打刻アクション（出勤・休憩入・休憩戻・退勤）の登録処理
+     */
+    public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
         $today = Carbon::today();
@@ -33,11 +41,11 @@ class AttendanceStampController extends Controller
 
         switch ($request->input('action')) {
             case 'clock_in': // 出勤
-                if (!$attendance) {
+                if (! $attendance) {
                     Attendance::create([
                         'user_id' => $user->id,
                         'date' => $today,
-                        'clock_in_at' => $now, // 日付+時刻をセット（$now または $now->toDateTimeString()）
+                        'clock_in_at' => $now,
                         'status' => 2,
                     ]);
                 }
@@ -65,7 +73,7 @@ class AttendanceStampController extends Controller
                 }
                 break;
 
-            case 'clock_out':
+            case 'clock_out': // 退勤
                 if ($attendance && ($attendance->status === 2 || $attendance->status === 3)) {
                     $attendance->update([
                         'clock_out_at' => $now,

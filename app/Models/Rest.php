@@ -18,6 +18,8 @@ class Rest extends Model
 
     /**
      * 勤怠データとのリレーション（多対1）
+     *
+     * @return BelongsTo
      */
     public function attendance(): BelongsTo
     {

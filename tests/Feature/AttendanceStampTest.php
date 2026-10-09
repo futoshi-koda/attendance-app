@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Attendance;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AttendanceStampTest extends TestCase
@@ -17,7 +17,7 @@ class AttendanceStampTest extends TestCase
     // ==========================================
 
     /** @test */
-    public function 現在の日時情報がUIと同じ形式で出力されている(): void
+    public function 現在の日時情報が_u_iと同じ形式で出力されている(): void
     {
         // Arrange
         $now = Carbon::create(2026, 10, 2, 9, 0, 0);

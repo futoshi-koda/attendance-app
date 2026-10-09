@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Attendance;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class ApplicationListController extends Controller
 {
     /**
      * 申請一覧画面（PG06 / PG12）の表示
      */
-    public function index()
+    public function index(): View
     {
         $user = Auth::user();
 
@@ -28,7 +28,7 @@ class ApplicationListController extends Controller
 
         $attendances = $query->orderBy('updated_at', 'desc')->get();
 
-        // 2. Blade が求めるプロパティ構造に合わせて動的属性を追加
+        // 2. Blade が求めるプロパティ構造に合わせて動的属性を追加（Collection メソッドを活用）
         $applications = $attendances->map(function ($attendance) {
             // ステータス表示テキスト（5: 承認待ち, 6: 承認済み）
             $attendance->approval_status = ((int) $attendance->status === 6) ? '承認済み' : '承認待ち';

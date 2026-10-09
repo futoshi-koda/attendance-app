@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Carbon\Carbon;
 
 class Attendance extends Model
 {
@@ -23,6 +23,8 @@ class Attendance extends Model
 
     /**
      * ユーザーとのリレーション（多対1）
+     *
+     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -31,6 +33,8 @@ class Attendance extends Model
 
     /**
      * 休憩データとのリレーション（1対多）
+     *
+     * @return HasMany
      */
     public function rests(): HasMany
     {
@@ -43,41 +47,48 @@ class Attendance extends Model
 
     /**
      * 出勤時刻 ($attendance->clock_in)
+     *
+     * @return mixed
      */
-    public function getClockInAttribute()
+    public function getClockInAttribute(): mixed
     {
         return $this->clock_in_at;
     }
 
     /**
      * 退勤時刻 ($attendance->clock_out)
+     *
+     * @return mixed
      */
-    public function getClockOutAttribute()
+    public function getClockOutAttribute(): mixed
     {
         return $this->clock_out_at;
     }
 
     /**
      * 備考・修正理由 ($attendance->comment)
+     *
+     * @return string|null
      */
-    public function getCommentAttribute()
+    public function getCommentAttribute(): ?string
     {
         return $this->remarks;
     }
 
     /**
      * 休憩合計時間 ($attendance->total_break_time)
+     *
+     * @return string|null
      */
-    public function getTotalBreakTimeAttribute()
+    public function getTotalBreakTimeAttribute(): ?string
     {
-        $totalMinutes = 0;
-        foreach ($this->rests as $rest) {
+        // Collection メソッド sum を活用して休憩合計分を算出
+        $totalMinutes = $this->rests->sum(function ($rest) {
             if ($rest->break_in && $rest->break_out) {
-                $start = Carbon::parse($rest->break_in);
-                $end = Carbon::parse($rest->break_out);
-                $totalMinutes += $end->diffInMinutes($start);
+                return Carbon::parse($rest->break_out)->diffInMinutes(Carbon::parse($rest->break_in));
             }
-        }
+            return 0;
+        });
 
         if ($totalMinutes === 0) {
             return null;
@@ -92,7 +103,7 @@ class Attendance extends Model
     /**
      * 勤務合計時間 ($attendance->total_time)
      */
-    public function getTotalTimeAttribute()
+    public function getTotalTimeAttribute(): ?string
     {
         if (!$this->clock_in_at || !$this->clock_out_at) {
             return null;
@@ -102,14 +113,15 @@ class Attendance extends Model
         $end = Carbon::parse($this->clock_out_at);
         $workMinutes = $end->diffInMinutes($start);
 
-        // 休憩時間を差し引く
-        foreach ($this->rests as $rest) {
+        // Collection メソッド sum を活用して休憩時間を一括算出・マイナス
+        $totalBreakMinutes = $this->rests->sum(function ($rest) {
             if ($rest->break_in && $rest->break_out) {
-                $bStart = Carbon::parse($rest->break_in);
-                $bEnd = Carbon::parse($rest->break_out);
-                $workMinutes -= $bEnd->diffInMinutes($bStart);
+                return Carbon::parse($rest->break_out)->diffInMinutes(Carbon::parse($rest->break_in));
             }
-        }
+            return 0;
+        });
+
+        $workMinutes -= $totalBreakMinutes;
 
         if ($workMinutes <= 0) {
             return null;

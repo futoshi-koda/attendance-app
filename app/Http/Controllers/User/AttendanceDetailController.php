@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
@@ -6,18 +7,20 @@ use App\Http\Requests\AttendanceUpdateRequest;
 use App\Models\Attendance;
 use App\Models\Rest;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AttendanceDetailController extends Controller
 {
     /**
      * 勤怠詳細画面（PG05）の表示
      */
-    public function show($id)
+    public function show(int|string $id): View
     {
         $user = auth()->user();
 
-        //    ログインユーザーが管理者の場合は、管理者用のコントローラー処理へ委譲する
+        // ログインユーザーが管理者の場合は、管理者用のコントローラー処理へ委譲する
         if ($user->role === 2) {
             return app(\App\Http\Controllers\Admin\AttendanceDetailController::class)->show($id);
         }
@@ -28,13 +31,13 @@ class AttendanceDetailController extends Controller
         $isPending = ($attendance->status === 'pending' || $attendance->status === 5);
         $pendingApplication = $isPending ? $attendance : null;
 
-        $breaks = [];
-        foreach ($attendance->rests as $rest) {
-            $breaks[] = [
+        // 休憩データの整形（Collection メソッド map を活用）
+        $breaks = $attendance->rests->map(function ($rest) {
+            return [
                 'break_in' => $rest->break_in ? Carbon::parse($rest->break_in)->format('H:i') : '',
                 'break_out' => $rest->break_out ? Carbon::parse($rest->break_out)->format('H:i') : '',
             ];
-        }
+        })->toArray();
 
         $attendanceDate = Carbon::parse($attendance->date);
 
@@ -55,7 +58,7 @@ class AttendanceDetailController extends Controller
     /**
      * 勤怠修正申請の送信処理（POST）
      */
-    public function update(AttendanceUpdateRequest $request, $id)
+    public function update(AttendanceUpdateRequest $request, int|string $id): RedirectResponse
     {
         $attendance = Attendance::findOrFail($id);
 

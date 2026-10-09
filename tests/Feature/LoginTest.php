@@ -82,7 +82,6 @@ class LoginTest extends TestCase
         $response->assertRedirect('/attendance');
     }
 
-
     // ==========================================
     // ID3: 管理者 ログイン認証テスト
     // ==========================================

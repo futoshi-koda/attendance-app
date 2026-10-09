@@ -40,11 +40,13 @@ class AttendanceFactory extends Factory
             'clock_in_at' => function (array $attributes) use ($timeIn) {
                 // 上書きされた 'date' を取得して時刻文字列を結合
                 $date = $attributes['date'];
+
                 return "{$date} {$timeIn}";
             },
             'clock_out_at' => function (array $attributes) use ($timeOut) {
                 // 上書きされた 'date' を取得して時刻文字列を結合
                 $date = $attributes['date'];
+
                 return "{$date} {$timeOut}";
             },
             'status' => 4, // 退勤済
@@ -57,7 +59,7 @@ class AttendanceFactory extends Factory
      */
     public function working(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'date' => now()->format('Y-m-d'),
             'clock_in_at' => now()->format('Y-m-d 09:00:00'),
             'clock_out_at' => null,
@@ -71,7 +73,7 @@ class AttendanceFactory extends Factory
      */
     public function resting(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'date' => now()->format('Y-m-d'),
             'clock_in_at' => now()->format('Y-m-d 09:00:00'),
             'clock_out_at' => null,
@@ -85,7 +87,7 @@ class AttendanceFactory extends Factory
      */
     public function offWork(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'date' => now()->format('Y-m-d'),
             'clock_in_at' => null,
             'clock_out_at' => null,

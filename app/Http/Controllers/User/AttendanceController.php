@@ -1,23 +1,26 @@
 <?php
+
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class AttendanceController extends Controller
 {
     /**
      * 勤怠一覧画面（PG04）を表示
      */
-    public function index(Request $request)
+    public function index(Request $request): View|RedirectResponse
     {
         // 管理者の場合は管理者用日次勤怠一覧（PG08）へリダイレクト
         if (Auth::check() && Auth::user()->role === 2) {
             return redirect()->route('admin.attendance.list');
         }
+
         // 1. クエリパラメータ 'date' を取得（指定がなければ当月1日）
         $dateParam = $request->query('date');
 
@@ -36,7 +39,7 @@ class AttendanceController extends Controller
         $endOfMonth = $date->copy()->endOfMonth();
         $daysInMonth = $date->daysInMonth;
 
-        // 4. ログインユーザーの対象月勤怠データを取得（日付文字列をキーにして保持）
+        // 4. ログインユーザーの対象月勤怠データを取得（Eager Loading で N+1 防止 & keyBy 保持）
         $user = Auth::user();
         $attendances = $user->attendances()
             ->with('rests')
