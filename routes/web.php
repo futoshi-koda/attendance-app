@@ -95,3 +95,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/stamp_correction_request/list', [ApplicationListController::class, 'index'])
         ->name('admin.application.list');
 });
+// 管理者用 CSV出力ルート
+Route::post('/export', [App\Http\Controllers\Admin\AttendanceCsvExportController::class, 'export'])
+    ->middleware(['auth', 'admin']);
