@@ -96,6 +96,9 @@ Route::middleware(['auth'])->group(function () {
 // ==================================================
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    // マイ勤怠レポート画面（US016: FN052）
+    Route::get('/attendance/report', [App\Http\Controllers\User\ReportController::class, 'index'])->name('attendance.report');
+
     // 一般ユーザー機能
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
     Route::post('/attendance', [AttendanceStampController::class, 'store'])->name('attendance.store');
