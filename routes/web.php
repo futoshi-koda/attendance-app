@@ -48,20 +48,53 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->as('admin.')->group(funct
 });
 
 // ==================================================
-// 2. 認証済み一般ユーザー・管理者共通ルート（auth）
+// 2. メール認証関連ルート（FN011, FN012）
 // ==================================================
 Route::middleware('auth')->group(function () {
+    // メール認証誘導画面（未認証状態のユーザーがアクセスするページ）
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
 
-    // ログイン後の振分トップ（リダイレクト受け皿）
+    // メール内のリンクを押したときの認証処理（メール認証完了）
+    Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect()->route('attendance.show')->with('message', 'メール認証が完了しました。');
+    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+
+    // 認証メール再送処理（FN012）
+    Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('message', '認証メールを再送しました。');
+    })->middleware('throttle:6,1')->name('verification.send');
+});
+
+// ==================================================
+// 3. 未認証ユーザーの強制ガードルート（メール認証画面へのフォールバック）
+// ==================================================
+// 認証済みかつ、まだメール認証が済んでいない一般ユーザーが /home や /attendance 等にアクセスした場合の受け皿
+Route::middleware(['auth'])->group(function () {
     Route::get('/home', function () {
         $user = auth()->user();
 
+        // 管理者の場合は管理者画面へ
         if ($user->role === 2) {
             return redirect()->route('admin.application.list');
         }
 
+        // 一般ユーザーで未認証の場合は、明示的にメール認証画面へ誘導
+        if (!$user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         return redirect()->route('attendance.show');
     })->name('home');
+});
+
+// ==================================================
+// 4. 認証済みかつ「メール認証完了（verified）」の一般ユーザー専用ルート
+// ==================================================
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // 一般ユーザー機能
     Route::get('/attendance', [AttendanceStampController::class, 'show'])->name('attendance.show');
@@ -95,6 +128,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/stamp_correction_request/list', [ApplicationListController::class, 'index'])
         ->name('admin.application.list');
 });
+
 // 管理者用 CSV出力ルート
 Route::post('/export', [App\Http\Controllers\Admin\AttendanceCsvExportController::class, 'export'])
     ->middleware(['auth', 'admin']);
