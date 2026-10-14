@@ -47,6 +47,23 @@ class AttendanceRecordController extends Controller
         // ResourceCollection を用いて返すことで、自動的に meta (current_page, last_page, per_page, total 等) を付与
         return AttendanceResource::collection($attendances);
     }
+    /**
+     * 指定した勤怠の詳細を取得する
+     * 
+     * @param int|string $id
+     * @return AttendanceResource|\Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        // ユーザー、休憩（rests）、修正申請等の関連を Eager Load
+        $attendanceRecord = Attendance::with(['user', 'rests'])->find($id);
 
-    // 他のエンドポイント (store, show, update, destroy) は順次追加していきます
+        if (!$attendanceRecord) {
+            return response()->json([
+                'error' => '勤怠情報が見つかりませんでした。'
+            ], 404);
+        }
+
+        return new AttendanceResource($attendanceRecord);
+    }
 }
