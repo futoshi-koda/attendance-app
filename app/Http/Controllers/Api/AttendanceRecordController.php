@@ -1,11 +1,52 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AttendanceResource;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AttendanceRecordController extends Controller
 {
-    //
+    /**
+     * 勤怠一覧を取得する（検索・絞り込み・ページネーション対応）
+     * 
+     * @param Request $request
+     * @return AnonymousResourceCollection
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $query = Attendance::query();
+
+        // 1. user_id による絞り込み
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->integer('user_id'));
+        }
+
+        // 2. date による絞り込み（YYYY-MM-DD）
+        if ($request->filled('date')) {
+            $query->where('date', $request->input('date'));
+        }
+
+        // 3. month による絞り込み（YYYY-MM）
+        if ($request->filled('month')) {
+            $month = $request->input('month'); // 例: "2026-09"
+            $query->whereYear('date', '=', substr($month, 0, 4))
+                ->whereMonth('date', '=', substr($month, 5, 2));
+        }
+
+        // 4. ページネーション（デフォルト 20、最大 100）
+        $perPage = min($request->integer('per_page', 20), 100);
+        $perPage = max($perPage, 1);
+
+        $attendances = $query->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+
+        // ResourceCollection を用いて返すことで、自動的に meta (current_page, last_page, per_page, total 等) を付与
+        return AttendanceResource::collection($attendances);
+    }
+
+    // 他のエンドポイント (store, show, update, destroy) は順次追加していきます
 }
