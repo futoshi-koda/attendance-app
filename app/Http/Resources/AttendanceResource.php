@@ -16,14 +16,24 @@ class AttendanceResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
+            'user' => [
+                'id' => $this->user->id ?? null,
+                'name' => $this->user->name ?? null,
+            ],
             'date' => $this->date,
-            'clock_in_at' => $this->clock_in_at,
-            'clock_out_at' => $this->clock_out_at,
-            'status' => $this->status,
-            'remarks' => $this->remarks,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'clock_in' => $this->clock_in_at,
+            'clock_out' => $this->clock_out_at,
+            'breaks' => $this->whenLoaded('rests', function () {
+                return $this->rests->map(function ($rest) {
+                    return [
+                        'id' => $rest->id,
+                        'break_in' => $rest->break_in,
+                        'break_out' => $rest->break_out,
+                    ];
+                });
+            }),
+            'applications' => [],
+            'comment' => $this->remarks,
         ];
     }
 }
