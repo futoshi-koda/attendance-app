@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\RegisterResponse;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Attendance;
+use App\Policies\AttendanceRecordPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -60,5 +63,7 @@ class AppServiceProvider extends ServiceProvider
                 }
             };
         });
+        // Attendance モデルに対して AttendanceRecordPolicy を明示的に紐付け
+        Gate::policy(Attendance::class, AttendanceRecordPolicy::class);
     }
 }
