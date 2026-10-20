@@ -60,7 +60,6 @@ class AttendanceWriteTest extends TestCase
             'clock_out_at' => '2026-10-18 18:00:00',
         ]);
 
-        // FormRequest（AttendanceUpdateRequest）のルール（new_clock_in 等）に合わせたデータ例
         $updateData = [
             'new_clock_in' => '08:30',
             'new_clock_out' => '17:30',
@@ -70,7 +69,6 @@ class AttendanceWriteTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->putJson("/api/v1/attendance-records/{$attendance->id}", $updateData);
 
-        // ※ポリシーや認可で403が出る場合は、ユーザーの一致等も確認してください
         $response->assertStatus(200);
     }
 
@@ -118,5 +116,40 @@ class AttendanceWriteTest extends TestCase
             ->deleteJson("/api/v1/attendance-records/{$nonExistentId}");
 
         $response->assertStatus(404);
+    }
+    /** @test */
+    public function 未認証時に書き込み系APIにアクセスすると401エラーが返る(): void
+    {
+        // 認証（actingAs）をせずに POST リクエストを送る
+        $response = $this->postJson('/api/v1/attendance-records', [
+            'date' => '2026-10-18',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /** @test */
+    public function 他ユーザーの勤怠を更新しようとすると403エラーが返る(): void
+    {
+        // ユーザーA と ユーザーB を作成
+        $userA = User::factory()->create();
+        $userB = User::factory()->create();
+
+        // ユーザーAの勤怠データを作成
+        $attendance = Attendance::factory()->create([
+            'user_id' => $userA->id,
+            'date' => '2026-10-18',
+        ]);
+
+        // ユーザーBとしてログインし、ユーザーAの勤怠をPUTで更新しようとする
+        $response = $this->actingAs($userB, 'sanctum')
+            ->putJson("/api/v1/attendance-records/{$attendance->id}", [
+                'new_clock_in' => '09:00',
+                'new_clock_out' => '18:00',
+                'comment' => '不正な更新',
+            ]);
+
+        // 認可エラー（403 Forbidden）が返ることを確認
+        $response->assertStatus(403);
     }
 }
