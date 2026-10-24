@@ -1,66 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CONTACT-FORM-APP
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 概要
+COACHTECH 確認テストで作成した成果物です。
+勤怠管理のアプリ。一般ユーザーは出退勤や休憩入り・戻りをアプリから打刻可能。一般ユーザーは自分の勤怠の確認や修正申請ができる。
+管理者ユーザーは全ユーザーの勤怠記録の確認や、修正申請の承認、勤怠記録の修正ができる。
 
-## About Laravel
+## ER図
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 環境構築手順
+1. Laravelプロジェクトの作成 (Laravel 10.x)
+以下のDockerコマンドを実行。
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    -e COMPOSER_CACHE_DIR=/tmp/composer_cache \
+    laravelsail/php82-composer:latest \
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+2. Laravel Sailのインストール
+以下のコマンドを実行し、プロジェクトディレクトリに移動→Laravel Sailをインストール。
+cd contact-form-app
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    -e COMPOSER_CACHE_DIR=/tmp/composer_cache \
+    laravelsail/php82-composer:latest \
+    composer require laravel/sail --dev
+以下のDockerコマンドを実行し、Sailの設定ファイルをパブリッシュ（MySQLを選択）
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    -e COMPOSER_CACHE_DIR=/tmp/composer_cache \
+    laravelsail/php82-composer:latest \
+    php artisan sail:install --with=mysql
+※M1/M2/M3 Mac（Apple Silicon）をお使いの方
+Apple Silicon搭載のMacでは、`sail up -d`実行時に以下のエラーが発生することがありますが、解決方法の詳述は、割愛。
 
-## Learning Laravel
+3. .env ファイルの設定
+.env ファイルを開き、データベース接続情報が以下と一致していることを確認します。
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=sail
+DB_PASSWORD=password
+重要: DB_HOST は localhost や 127.0.0.1 ではなく、Dockerコンテナ名である mysql を指定します。
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+4. フロントエンドのセットアップ (Vite & Tailwind CSS)
+本プロジェクトでは、フロントエンドのスタイリングにTailwind CSSを使用します。
+Sailを起動する。
+./vendor/bin/sail up -d
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+NPM依存パッケージをインストール。
+sail npm install
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Tailwind CSSのインストール
+sail npm install -D tailwindcss@^3.4.0 postcss autoprefixer
+sail npm install alpinejs
 
-## Laravel Sponsors
+設定ファイルの生成
+sail npx tailwindcss init -p
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Tailwind CSSのテンプレートパス設定
+プロジェクトフォルダ直下のtailwind.config.js を開き、以下のように設定。
+/** @type {import("tailwindcss").Config} */
+export default {
+  content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.vue",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
 
-### Premium Partners
+提供リポジトリのresourcesディレクトリと入れ替え
+以下のリポジトリをクローンし、resourcesディレクトリを丸ごと入れ替える。
+https://github.com/coachtech-prepared-file/Preparedblade-mockcase-Attendance
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+入れ替え手順:
+①プロジェクトとは別のフォルダ（ダウンロード等）でクローンコマンドを実行
+② Finderでプロジェクトフォルダを開きます。
+open .
+③ プロジェクト内の resources フォルダを削除します。
+④クローンしたリポジトリ内の resources フォルダをプロジェクト直下にコピーします。
 
-## Contributing
+6. Vite開発サーバーの起動
+sail npm run dev
+注意: sail npm run dev は実行したままにしておく必要があるため、別のターミナルで実行。
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. phpMyAdminの追加
+compose.yaml を開き、mysql サービスの後に以下の設定を挿入する。
+※mysqlと同じ階層に挿入しないと正常動作しないため、注意する事。
+compose.yaml に追加する内容:
 
-## Code of Conduct
+    phpmyadmin:
+        image: 'phpmyadmin:latest'
+        ports:
+            - '${FORWARD_PHPMYADMIN_PORT:-8080}:80'
+        environment:
+            PMA_HOST: mysql
+            PMA_USER: '${DB_USERNAME}'
+            PMA_PASSWORD: '${DB_PASSWORD}'
+        networks:
+            - sail
+        depends_on:
+            - mysql
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. Sailの起動とエイリアス設定
+Sailをバックグラウンドで起動
+./vendor/bin/sail up -d
 
-## Security Vulnerabilities
+エイリアスを設定して 'sail' だけでコマンドを実行できるようにする
+echo "alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'" >> ~/.zshrc
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+シェルを再起動するか、新しいターミナルを開いてエイリアスを有効にする
+exec $SHELL
 
-## License
+7. アプリケーションキーの生成
+ルートで以下のコマンドを実行する
+sail artisan key:generate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. データベースのマイグレーションと初期データ投入
+以下のコマンドでテーブルを作成し、初期データを投入します。
+sail artisan migrate --seed
+
+## 使用技術
+- PHP 8.x
+- Laravel 10.x
+- Laravel Fortify（認証）
+- phpMyAdmin
+- Eloquent / Factory / Seeder
+- PHPUnit / Orchestra Testbench
+- Docker / Laravel Sail
+- Tailwind CSS
+- Laravel Form Request
+- StreamedResponse / CSV Output
+- mailpit
+
+## APIエンドポイント一覧
+メソッド	  パス	                                          概要
+GET	         /api/v1/attendance-records	                     勤怠一覧を取得する
+GET	         /api/v1/attendance-records/{attendanceRecord}	勤怠詳細を取得する
+POST	     /api/v1/attendance-records	                    勤怠を新規登録する
+PUT	         /api/v1/attendance-records/{attendanceRecord}	勤怠を更新する
+DELETE	     /api/v1/attendance-records/{attendanceRecord}	勤怠を削除する
+
+
+## 開発環境URL
+http://localhost
+phpMyAdmin:http://localhost:8080
+
+## 作成者
+甲田　太志
+
