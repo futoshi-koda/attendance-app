@@ -79,7 +79,7 @@ class LoginTest extends TestCase
 
         // Assert
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect('/attendance');
+        $response->assertRedirect('/home');
     }
 
     // ==========================================
