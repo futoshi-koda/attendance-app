@@ -6,7 +6,7 @@ COACHTECH 確認テストで作成した成果物です。
 管理者ユーザーは全ユーザーの勤怠記録の確認や、修正申請の承認、勤怠記録の修正ができる。
 
 ## ER図
-
+<img width="841" height="350" alt="Image" src="https://github.com/user-attachments/assets/271bae01-1a2f-48fb-b106-1f5a6d1553d1" />
 
 ## 環境構築手順
 1. Laravelプロジェクトの作成 (Laravel 10.x)
